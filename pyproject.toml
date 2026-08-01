@@ -1,5 +1,5 @@
 [project]
-name = "aitools-mcp"
+name = "aitools"
 version = "0.1.0"
 description = "Custom MCP server with auto-registered tools"
 requires-python = ">=3.10"
@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.scripts]
-aitools-mcp = "aitools_mcp.server:mcp.run"
+aitools = "aitools.server:mcp.run"
 
 [tool.uv]
 package = { source = "src" }
