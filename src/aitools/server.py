@@ -10,7 +10,11 @@ import importlib
 import pkgutil
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastmcp import FastMCP
+
+# Load .env from project root (where pyproject.toml lives)
+load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 TOOLS_DIR = Path(__file__).parent / "tools"
 

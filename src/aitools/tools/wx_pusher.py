@@ -1,41 +1,36 @@
-"""WxPusher push tool - push notifications to desktop (popup) and mobile via WxPusher."""
 import os
 import requests
 
 from aitools.server import tool
 
-WX_PUSHER_URL = "https://wxpusher.zjiecode.com/api/send/message/simple-push"
 
-
-@tool(name="send_message", description="Push a notification to desktop (popup) and mobile via WxPusher.")
+@tool(name="send_message", description="Push a notification to desktop (popup) and mobile")
 def send_message(
+    title: str,
     content: str,
-    summary: str | None = None,
-    use_html: bool = False,
-    spt: str | None = None,
+    use_html: bool = False
 ) -> str:
-    """Push a notification via WxPusher (desktop popup + mobile notification).
+    """Send a push notification via WxPusher.
 
     Args:
-        content: Message content (markdown or HTML).
-        summary: Brief summary (max 100 chars).
-        use_html: False=markdown(3), True=html(2).
-        spt: WxPusher SPT token (or set WXPUSHER_SPT env var).
+        title: Notification title (shown in mobile notification banner).
+        content: Message body (markdown or HTML).
+        use_html: False=markdown, True=html.
     """
-    token = spt or os.environ.get("WXPUSHER_SPT", "")
+    token = os.environ.get("WXPUSHER_SPT")
     if not token:
         return "✗ Error: SPT token not provided. Set spt arg or WXPUSHER_SPT env var."
 
     payload = {
+        "summary": title,
         "content": content,
         "contentType": 2 if use_html else 3,
         "spt": token,
     }
-    if summary:
-        payload["summary"] = summary[:100]
 
     try:
-        resp = requests.post(WX_PUSHER_URL, json=payload, timeout=10)
+        url = "https://wxpusher.zjiecode.com/api/send/message/simple-push"
+        resp = requests.post(url, json=payload, timeout=10)
         resp.raise_for_status()
         result = resp.json()
         if result.get("code") == 1000:
