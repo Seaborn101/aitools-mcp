@@ -3,7 +3,7 @@ MCP Server with auto-tool registration.
 
 Framework design:
 - Add new .py files to src/aitools/tools/
-- Each file exports: get_tool() -> Tool and run_tool(**kwargs) -> str
+- Each tool function uses @tool decorator (from this module)
 - Tools auto-register on server start
 """
 import importlib
@@ -14,28 +14,42 @@ from fastmcp import FastMCP
 
 TOOLS_DIR = Path(__file__).parent / "tools"
 
+# Global registry for tools: {(module_name, func_name): func}
+_tool_registry: dict = {}
+
+
+def tool(name: str | None = None, description: str | None = None):
+    """Decorator to register a function as an MCP tool."""
+    def decorator(fn):
+        key = (fn.__module__.split(".")[-1], fn.__name__)
+        _tool_registry[key] = {
+            "fn": fn,
+            "name": name or fn.__name__,
+            "description": description or fn.__doc__ or "",
+        }
+        return fn
+    return decorator
+
 
 def create_server() -> FastMCP:
     mcp = FastMCP("aitools")
 
-    # Iterate all modules in tools package
+    # Load all tool modules
     for _importer, modname, ispkg in pkgutil.iter_modules([str(TOOLS_DIR)]):
         if modname.startswith("_"):
             continue
-
         full_name = f"aitools.tools.{modname}"
-        module = importlib.import_module(full_name)
+        importlib.import_module(full_name)
 
-        # Look for get_tool() export
-        if hasattr(module, "get_tool") and hasattr(module, "run_tool"):
-            tool = module.get_tool()
-            run_fn = module.run_tool
+    # Register discovered tools
+    for (modname, funcname), info in _tool_registry.items():
+        fn = info["fn"]
 
-            @mcp.tool(name=tool.name, description=tool.description)
-            def tool_wrapper(kwargs, _run=run_fn, _schema=tool.inputSchema):
-                return _run(**kwargs)
+        @mcp.tool(name=info["name"], description=info["description"])
+        def wrapper(kwargs, _fn=fn):
+            return _fn(**kwargs)
 
-            print(f"✓ Registered: {tool.name}")
+        print(f"✓ Registered: {info['name']} ({modname}.{funcname})")
 
     return mcp
 
@@ -44,5 +58,4 @@ mcp = create_server()
 
 
 if __name__ == "__main__":
-    # Run: python -m aitools.server
     mcp.run()
