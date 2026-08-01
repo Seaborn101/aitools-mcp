@@ -1,3 +1,12 @@
+"""WxPusher 推送工具 - 发送桌面弹窗 + 手机通知。
+
+摘要: 通过 WxPusher 发送桌面弹窗和手机推送通知
+依赖: requests
+约束:
+- 需要设置 WXPUSHER_SPT 环境变量
+- content 建议不超过 1024 字符
+"""
+
 import os
 import requests
 

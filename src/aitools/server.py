@@ -8,10 +8,15 @@ Framework design:
 """
 import importlib
 import pkgutil
+import warnings
 from pathlib import Path
 
 from dotenv import load_dotenv
 from fastmcp import FastMCP
+from pydantic.json_schema import PydanticJsonSchemaWarning
+
+# Suppress pydantic non-serializable default warning (cosmetic,不影响功能)
+warnings.filterwarnings("ignore", category=PydanticJsonSchemaWarning)
 
 # Load .env from project root (where pyproject.toml lives)
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
@@ -53,7 +58,7 @@ def create_server() -> FastMCP:
         def wrapper(kwargs, _fn=fn):
             return _fn(**kwargs)
 
-        print(f"✓ Registered: {info['name']} ({modname}.{funcname})")
+        print(f"[+] Registered: {info['name']} ({modname}.{funcname})")
 
     return mcp
 
