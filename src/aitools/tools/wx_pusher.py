@@ -1,4 +1,4 @@
-"""WxPusher push tool - send messages to WeChat via WxPusher."""
+"""WxPusher push tool - push notifications to desktop (popup) and mobile via WxPusher."""
 import os
 import requests
 
@@ -7,14 +7,14 @@ from aitools.server import tool
 WX_PUSHER_URL = "https://wxpusher.zjiecode.com/api/send/message/simple-push"
 
 
-@tool(name="send_message", description="Push a message to WeChat via WxPusher.")
+@tool(name="send_message", description="Push a notification to desktop (popup) and mobile via WxPusher.")
 def send_message(
     content: str,
     summary: str | None = None,
     use_html: bool = False,
     spt: str | None = None,
 ) -> str:
-    """Send a message via WxPusher.
+    """Push a notification via WxPusher (desktop popup + mobile notification).
 
     Args:
         content: Message content (markdown or HTML).
