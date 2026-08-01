@@ -1,12 +1,10 @@
 """WxPusher push tool - send messages to WeChat via WxPusher."""
+import os
 import requests
 from fastmcp import Tool
 
-# WxPusher API endpoint
 WX_PUSHER_URL = "https://wxpusher.zjiecode.com/api/send/message/simple-push"
-
-# Default SPT token
-DEFAULT_SPT = "SPT_gYtsAePhbsFjZyU8FJm5ttiJmd5f"
+DEFAULT_SPT = os.environ.get("WXPUSHER_SPT", "")
 
 
 def get_tool() -> Tool:
@@ -45,10 +43,14 @@ def run_tool(
     spt: str | None = None,
 ) -> str:
     """Send a message via WxPusher."""
+    token = spt or DEFAULT_SPT
+    if not token:
+        return "✗ Error: SPT token not provided. Set spt arg or WXPUSHER_SPT env var."
+
     payload = {
         "content": content,
         "contentType": 2 if use_html else 3,
-        "spt": spt or DEFAULT_SPT,
+        "spt": token,
     }
     if summary:
         payload["summary"] = summary[:100]
